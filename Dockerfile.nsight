@@ -1,0 +1,56 @@
+# https://hub.docker.com/r/nvidia/cuda
+FROM nvidia/cuda:12.6.0-runtime-ubuntu22.04
+
+ENV NVIDIA_REPO=https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64
+ENV NVIDIA_REPO_PUBKEY=3bf863cc.pub
+ENV DEBIAN_FRONTEND=noninteractive 
+
+RUN apt update -y && apt upgrade -y
+RUN apt install -y --no-install-recommends \
+         apt-transport-https \
+         ca-certificates \
+         gnupg \
+         locales \
+         software-properties-common \
+         vim \
+         wget
+
+RUN locale-gen en_US en_US.UTF-8
+RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+
+RUN rm -rf /var/lib/apt/lists/*
+
+RUN  wget -qO - "$NVIDIA_REPO/$NVIDIA_REPO_PUBKEY" | apt-key add - 
+
+RUN apt-get update -y 
+RUN apt-get install -y --no-install-recommends \
+         cuda-nsight-compute-12-6 
+
+# Add OpenGL requirement
+RUN add-apt-repository ppa:ubuntu-x-swat/updates
+RUN apt install -y \
+        mesa-utils \
+        libglu1-mesa-dev \
+        freeglut3-dev \
+        mesa-common-dev
+
+ENV LIBGL_ALWAYS_INDIRECT=0
+
+# Add runtime requirements for Qt-based profiler
+RUN apt install -y \
+    libxkbcommon-x11-0 libxkbfile1 \
+    libfontconfig \
+    libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-util0-dev libxcb-shape0 \
+    libnss3 \
+    libxcomposite1 libxrender1 libxrandr2 \
+    libxtst6 
+
+ENV NSIGHT_SYSTEMS_DEB=nsight-systems-2024.5.1_2024.5.1.113-1_amd64.deb
+# Add nsight-systems profiler
+RUN wget https://developer.nvidia.com/downloads/assets/tools/secure/nsight-systems/2024_5/$NSIGHT_SYSTEMS_DEB
+RUN apt install -y ./$NSIGHT_SYSTEMS_DEB
+
+ENV PATH="/opt/nvidia/nsight-compute/2024.3.0/:/opt/nvidia/nsight-systems/2024.5.1/bin/:$PATH"
+
+RUN rm -rf /var/lib/apt/lists/*
