@@ -1,7 +1,7 @@
 # https://hub.docker.com/r/nvidia/cuda
-FROM nvidia/cuda:12.6.0-runtime-ubuntu22.04
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04
 
-ENV NVIDIA_REPO=https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64
+ENV NVIDIA_REPO=https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64
 ENV NVIDIA_REPO_PUBKEY=3bf863cc.pub
 ENV DEBIAN_FRONTEND=noninteractive 
 
@@ -46,11 +46,16 @@ RUN apt install -y \
     libxcomposite1 libxrender1 libxrandr2 \
     libxtst6 
 
-ENV NSIGHT_SYSTEMS_DEB=nsight-systems-2024.5.1_2024.5.1.113-1_amd64.deb
 # Add nsight-systems profiler
-RUN wget https://developer.nvidia.com/downloads/assets/tools/secure/nsight-systems/2024_5/$NSIGHT_SYSTEMS_DEB
+#ENV NSIGHT_SYSTEMS_DEB=nsight-systems-2024.5.1_2024.5.1.113-1_amd64.deb
+#RUN wget https://developer.nvidia.com/downloads/assets/tools/secure/nsight-systems/2024_5/$NSIGHT_SYSTEMS_DEB
+
+ENV NSIGHT_SYSTEMS_DEB=nsight-systems-2025.1.1_2025.1.1.103-1_amd64.deb
+RUN wget https://developer.nvidia.com/downloads/assets/tools/secure/nsight-systems/2025_1/$NSIGHT_SYSTEMS_DEB
+
 RUN apt install -y ./$NSIGHT_SYSTEMS_DEB
 
-ENV PATH="/opt/nvidia/nsight-compute/2024.3.0/:/opt/nvidia/nsight-systems/2024.5.1/bin/:$PATH"
+#ENV PATH="/opt/nvidia/nsight-compute/2024.3.0/:/opt/nvidia/nsight-systems/2024.5.1/bin/:$PATH"
+ENV PATH="/opt/nvidia/nsight-compute/2024.3.0/:/opt/nvidia/nsight-systems/2025.1.1/bin/:$PATH"
 
 RUN rm -rf /var/lib/apt/lists/*
